@@ -82,8 +82,14 @@ module.exports = {
   },
   async GetAllProducts(req, res) {
     try {
-      const products = await Product.find();
-      res.status(200).json({ products });
+      let { category } = req.query;
+      let products = [];
+      if (category === "all") {
+        products = await Product.find();
+      } else {
+        products = await Product.find({ category });
+      }
+      res.status(200).json(products);
     } catch (error) {
       res.status(403).json({ message: "Error when fetching products!" });
     }
