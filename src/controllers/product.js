@@ -67,9 +67,10 @@ module.exports = {
       if (!uploaded) {
         return res.status(403).json({ message: "Upload failed" });
       }
+      const camelName = _.camelCase(value.name);
       const newProduct = new Product({
         ...value,
-        code: _.camelCase(value.name),
+        code: removeAccents(camelName),
         imageUrl: uploaded.url,
       });
 
@@ -85,13 +86,27 @@ module.exports = {
       let { category } = req.query;
       let products = [];
       if (category === "all") {
-        products = await Product.find();
+        products = await Product.find()
+          .populate("shop", ["name", "address", "_id"])
+          .sort({ createdAt: "desc" })
+          .exec();
       } else {
-        products = await Product.find({ category });
+        products = await Product.find({ category })
+          .populate("shop", ["name", "address", "_id"])
+          .sort({ createdAt: "desc" })
+          .exec();
       }
       res.status(200).json(products);
     } catch (error) {
-      res.status(403).json({ message: "Error when fetching products!" });
+      res.status(403).json({ message: "Error when fetching products!", error });
     }
   },
 };
+
+function removeAccents(str) {
+  return str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D");
+}
