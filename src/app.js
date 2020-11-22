@@ -13,5 +13,6 @@ app.use(logger("dev"));
 app.use("/api/auth", require("./routes/authRoute"));
 app.use("/api/shop", require("./routes/shopRoute"));
 app.use("/api/product", require("./routes/productRoute"));
+app.use("/api/checkout", require("./routes/checkoutRoute"));
 
 module.exports = app;
