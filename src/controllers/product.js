@@ -83,7 +83,13 @@ module.exports = {
   },
   async GetAllProducts(req, res) {
     try {
-      let { category } = req.query;
+      let { category, id } = req.query;
+      if (id) {
+        const product = await Product.findById(id).populate("category", [
+          "name",
+        ]);
+        return res.status(200).json(product);
+      }
       let products = [];
       if (category === "all") {
         products = await Product.find()
