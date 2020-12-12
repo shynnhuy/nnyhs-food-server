@@ -9,6 +9,7 @@ const Helper = require("../helpers");
 const _ = require("lodash");
 
 const mongoose = require("mongoose");
+const { createStripeCustomer } = require("../utils/stripe");
 const User = mongoose.model("User");
 const Role = mongoose.model("Role");
 const Token = mongoose.model("RefreshToken");
@@ -108,6 +109,10 @@ module.exports = {
         .json({ message: "Error hashing password" });
     }
 
+    const stripeCustomer = await createStripeCustomer({
+      email: Helper.lowerCase(value.email),
+    });
+
     const newUser = new User({
       displayName: Helper.firstUpper(value.displayName),
       email: Helper.lowerCase(value.email),
@@ -115,6 +120,9 @@ module.exports = {
       age: value.age,
       address: value.address,
       password: hash,
+      customer: {
+        stripeId: stripeCustomer.id,
+      },
     });
 
     const userDoc = await newUser.save();
@@ -124,9 +132,6 @@ module.exports = {
         .json({ message: "Something error + " + err });
     }
 
-    // const token = await Helper.generateToken(userDoc);
-
-    // const token = newUser.generateAuthToken();
     let accessToken = await Helper.generateAccessToken(userDoc);
     let refreshToken = await Helper.generateRefreshToken(userDoc);
     newUser.refreshToken = refreshToken.token;
@@ -185,7 +190,9 @@ module.exports = {
       let token = req.body.refreshToken;
       //send error if no refreshToken is sent
       if (!token) {
-        return res.status(401).json({ message: "Access denied,token missing!" });
+        return res
+          .status(401)
+          .json({ message: "Access denied,token missing!" });
       } else {
         const oldRefreshToken = await Token.findOne({
           token,

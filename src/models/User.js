@@ -3,6 +3,25 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const RefreshToken = require("../models/RefreshToken");
 
+const CustomerSchema = new mongoose.Schema({
+  stripeId: {
+    type: String,
+    required: true,
+  },
+  subscriptionId: {
+    type: String,
+    required: false,
+  },
+  subscribedDate: {
+    type: Date,
+    required: false,
+  },
+  defaultPaymentId: {
+    type: String,
+    required: false,
+  },
+});
+
 const userSchema = new mongoose.Schema(
   {
     displayName: { type: String },
@@ -19,6 +38,11 @@ const userSchema = new mongoose.Schema(
     refreshToken: { type: String },
     isRequestShop: { type: Boolean, default: false },
     shop: { type: mongoose.Schema.Types.ObjectId, ref: "Shop" },
+    customer: {
+      type: CustomerSchema,
+      default: null,
+      required: false,
+    },
   },
   { timestamps: true }
 );

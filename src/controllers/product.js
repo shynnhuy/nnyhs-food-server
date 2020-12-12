@@ -1,4 +1,5 @@
 const cloudinary = require("../utils/cloudinary");
+const { StatusCodes } = require("http-status-codes");
 const Joi = require("joi");
 Joi.objectId = require("joi-objectid")(Joi);
 const _ = require("lodash");
@@ -81,15 +82,24 @@ module.exports = {
       res.status(500).json({ message: "Something went wrong" });
     }
   },
-  async GetAllProducts(req, res) {
+  async GetProduct(req, res) {
     try {
-      let { category, id } = req.query;
+      const { id } = req.params;
       if (id) {
         const product = await Product.findById(id).populate("category", [
           "name",
         ]);
         return res.status(200).json(product);
       }
+    } catch (error) {
+      res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "Error when fetching product!", error });
+    }
+  },
+  async GetAllProducts(req, res) {
+    try {
+      let { category } = req.query;
       let products = [];
       if (category === "all") {
         products = await Product.find()
@@ -105,6 +115,20 @@ module.exports = {
       res.status(200).json(products);
     } catch (error) {
       res.status(403).json({ message: "Error when fetching products!", error });
+    }
+  },
+  async GetProductsByShop(req, res) {
+    try {
+      const { shop } = req.query;
+      const products = await Product.find({ shop })
+        .populate("shop", ["name", "address", "_id"])
+        .sort({ createdAt: "desc" })
+        .exec();
+      res.status(StatusCodes.OK).json(products);
+    } catch (error) {
+      res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "Error when fetching shop products!", error });
     }
   },
 };

@@ -24,4 +24,6 @@ router.get("/", ProductCrtl.GetAllProducts);
 
 router.post("/create", upload.single("image"), ProductCrtl.CreateProduct);
 
+router.get("/:id", ProductCrtl.GetProduct);
+
 module.exports = router;

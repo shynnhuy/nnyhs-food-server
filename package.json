@@ -4,10 +4,10 @@
   "description": "NnyhS Project Backend",
   "main": "index.js",
   "scripts": {
-    "server": "node-dev index.js",
+    "server": "nodemon index.js",
     "client": "npm run start --prefix client",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "start": "node ."
+    "start": "nodemon ."
   },
   "keywords": [],
   "author": "Shynn",
